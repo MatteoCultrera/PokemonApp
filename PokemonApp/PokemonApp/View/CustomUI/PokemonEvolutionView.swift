@@ -16,6 +16,8 @@ class PokemonEvolutionView: UIView {
     private var pokemonImage: UIImage? = nil
     private var pokemon: PokemonShort!
     private var recognizer: UILongPressGestureRecognizer?
+    private var lastPositionTap: CGPoint?
+    private let dismissOffset: CGFloat = 10
     
     var cardView: UIView = {
         let view = UIView()
@@ -93,6 +95,7 @@ class PokemonEvolutionView: UIView {
         switch tap.state {
         case .began:
             self.tap(tapped: true)
+            lastPositionTap = tap.location(in: self)
         case .ended:
             self.tap(tapped: false)
             delegate?.delegateDidTapOnPokemon(pokemon: pokemon)
@@ -100,11 +103,27 @@ class PokemonEvolutionView: UIView {
             self.tap(tapped: false)
         case .changed:
             //Cancel tap
-            recognizer?.isEnabled = false
-            recognizer?.isEnabled = true
+            if let last = lastPositionTap  {
+                let dist = getDistance(pointOne: last, pointTwo: tap.location(in: self))
+                if dist > dismissOffset {
+                    recognizer?.isEnabled = false
+                    recognizer?.isEnabled = true
+                }
+            }
         default:
             break
         }
+    }
+    
+    func getDistance(pointOne: CGPoint, pointTwo: CGPoint) -> CGFloat {
+        
+        print("MATTEOLOG: one x \(pointOne.x) y \(pointOne.y), two x \(pointTwo.x) y \(pointTwo.y)")
+        
+        let x = pow((pointTwo.x - pointOne.x), 2)
+        let y = pow((pointTwo.y - pointOne.y), 2)
+        
+        return sqrt(x+y)
+        
     }
     
   
